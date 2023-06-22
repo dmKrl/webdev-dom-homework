@@ -157,7 +157,7 @@ console.log(arrayInputs);
     const inputValue = inputAddNameForm.value;
     const areaFormValue = areaAddFormRow.value;
 
-    inputAddNameForm.value === '' || areaAddFormRow.value === ''
+    inputValue === '' || areaFormValue === ''
       ? validateForm()
       : createCard(inputValue, areaFormValue, dateForComments(myDate));
   })
@@ -171,12 +171,12 @@ console.log(arrayInputs);
 
 
   // Вешаем обработчик событий на клавишу enter
-  form.addEventListener('keyup', (event) => {
+  document.addEventListener('keyup', (event) => {
     const inputValue = inputAddNameForm.value;
     const areaFormValue = areaAddFormRow.value;
 
     if (event.code === 'Enter') {
-      inputAddNameForm.value === '' || areaAddFormRow.value === ''
+      inputValue === '' || areaFormValue === ''
         ? validateForm()
         : createCard(inputValue, areaFormValue, dateForComments(myDate));
     }
