@@ -1,6 +1,24 @@
 "use strict";
-// Код писать здесь
-// console.log("It works!");
+
+const usersComments = [
+  {
+    name: 'Глеб Фокин',
+    date: '12.02.22 12:18',
+    comment: 'Это будет первый комментарий на этой странице',
+    isLike: false,
+    count: 3
+
+  },
+  {
+    name: 'Варвара Н.',
+    date: '13.02.22 19:22',
+    comment: 'Мне нравится как оформлена эта страница! ❤',
+    isLike: true,
+    count: 75
+  }
+]
+
+
 
 const form = document.querySelector('.add-form');
 const formInputs = document.querySelector('.add-form-input')
@@ -16,7 +34,8 @@ const myDate = new Date();
 
 
 const arrayInputs = [inputAddNameForm, areaAddFormRow]
-console.log(arrayInputs);
+
+
 // Функция даты, для добавления значения 0 перед числами < 10
 const dateForComments = (date) => {
   let data = myDate.getDate();
@@ -33,37 +52,40 @@ const dateForComments = (date) => {
   if (hour < 10) {
     hour = "0" + hour;
   }
-  if (hour < 10) {
-    hour = "0" + hour;
+  if (minute < 10) {
+    minute = "0" + minute;
   }
   return `${data}.${month}.${myDate.getFullYear().toString().substr(-2)} ${hour}:${minute}`;
 }
 
 
-// Создаём фунцию-генератор карточек
-function createCard(name, comment, date) {
-  const htmlCard = `        
-      <li class="comment">
-        <div class="comment-header">
-          <div>${name}</div>
-          <div>${date}</div>
-        </div>
-        <div class="comment-body">
-          <div class="comment-text">
-            ${comment}
-          </div>
-        </div>
-        <div class="comment-footer">
-          <div class="likes">
-            <span class="likes-counter">0</span>
-            <button class="like-button"></button>
-          </div>
-        </div>
-      </li>`
 
-  const liEnd = ulComments.children[ulComments.children.length - 1]
-  console.log(liEnd)
-  liEnd.insertAdjacentHTML('afterend', htmlCard);
+// Функция рендера списка комментариев
+const renderComments = () => {
+  const usersHtml = usersComments
+    .map((user, index) => {
+      return `
+      <li class="comment">
+      <div class="comment-header">
+        <div>${user.name}</div>
+        <div>${user.date}</div>
+      </div>
+      <div class="comment-body">
+        <div class="comment-text">
+          ${user.comment}
+        </div>
+      </div>
+      <div class="comment-footer">
+        <div class="likes">
+          <span class="likes-counter" data-index="${index}" data-count="${user.count}" value="${user.count}">${user.count}</span>
+          <button class="like-button" data-index="${index}" data-active-like="${user.isLike}"></button>
+        </div>
+      </div>
+    </li>`
+    })
+    .join('');
+
+  ulComments.innerHTML = usersHtml;
 
   inputAddNameForm.value = '';
   areaAddFormRow.value = '';
@@ -71,7 +93,27 @@ function createCard(name, comment, date) {
   inputAddNameForm.classList.remove('error');
   areaAddFormRow.classList.remove('error');
 
+  initAddLikesListener()
+  initAddLikesListenerForEnter();
 }
+renderComments();
+
+
+
+// Создаём фунцию-генератор карточек
+function appendComment(userName, userComment, userDate) {
+  usersComments.push({
+    name: userName,
+    date: userDate,
+    comment: userComment,
+    isLike: false,
+    count: 0
+
+  })
+  renderComments();
+}
+console.log(typeof usersComments)
+
 
 
 // Валидация
@@ -85,43 +127,85 @@ function validateForm() {
 }
 
 
+
 // Функция отключения активности кнопки при пустом input
 function handleInput() {
   buttonAddForm.disabled = arrayInputs.some(input => !input.value.length);
 }
 
 
+
 // Обработчики событий на наличие данных в input
-inputAddNameForm.addEventListener('change', handleInput);
-areaAddFormRow.addEventListener('change', handleInput);
+inputAddNameForm.addEventListener('input', handleInput);
+areaAddFormRow.addEventListener('input', handleInput);
+
 
 
 // Вынесли отдельно код для обработчика событий
 const handleFormSubmission = () => {
-    const inputValue = inputAddNameForm.value;
-    const areaFormValue = areaAddFormRow.value;
-  
-    inputValue === '' || areaFormValue === ''
-      ? validateForm()
-      : createCard(inputValue, areaFormValue, dateForComments(myDate));
+  const inputValue = inputAddNameForm.value;
+  const areaFormValue = areaAddFormRow.value;
+
+  inputValue === '' || areaFormValue === ''
+    ? validateForm()
+    : appendComment(inputValue, areaFormValue, dateForComments(myDate));
 }
 
 
+
 // Вешаем обработчик событий на кнопку add comment
-buttonAddForm.addEventListener('click', handleFormSubmission)
+buttonAddForm.addEventListener('click', handleFormSubmission);
+
 
 
 // Вешаем обработчик событий на клавишу enter
-document.addEventListener('keyup', (event) => {
-  if (event.code === 'Enter') {
-    handleFormSubmission
- }
-})
+function initAddLikesListenerForEnter() {
+  document.addEventListener('keyup', (event) => {
+    if (event.code === 'Enter') {
+      handleFormSubmission();
+    }
+  })
+}
+
 
 
 // Вешаем обработчик событий на кнопку delete comment
-buttonDeleteForm.addEventListener('click', () => {
-    const liEnd = ulComments.children[ulComments.children.length - 1]
-    console.log(liEnd.remove())
+  buttonDeleteForm.addEventListener('click', () => {
+    const liEnd = ulComments.children[ulComments.children.length - 1];
+    console.log(liEnd.remove());
   })
-  
+  renderComments();
+
+
+
+// // Функция обработчика кликов по кнопке лайк
+// let counter = document.querySelectorAll('span')
+function initAddLikesListener() {
+  const likesButton = document.querySelectorAll('.like-button');
+
+// Перебираем кнопки из коллекции
+  for (const likeButton of likesButton) {
+// Вызываем слушатель событий для каждой кнопки
+    likeButton.addEventListener('click', () => {
+      // Обозначаем элемент span
+      const likesCounterElement = likeButton.previousElementSibling;
+      const likesCounter = parseInt(likesCounterElement.textContent);
+
+      // Условное ветвление для отображеня изменений кнопки и счётчика
+      if (likeButton.dataset.activeLike === 'false') {
+        likeButton.dataset.activeLike = 'true'
+        likesCounterElement.dataset.count++
+        likesCounterElement.textContent = likesCounter + 1;
+        
+      } else {
+        likeButton.dataset.activeLike = 'false'
+        likesCounterElement.dataset.count--
+        likesCounterElement.textContent = likesCounter - 1;
+      }
+      
+      
+            // const index = likesCounterElement.dataset.index;
+            // console.log(usersComments.find(item => item === index))
+    })
+    }
+  }
