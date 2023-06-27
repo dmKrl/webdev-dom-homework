@@ -143,8 +143,16 @@ areaAddFormRow.addEventListener('input', handleInput);
 
 // Вынесли отдельно код для обработчика событий
 const handleFormSubmission = () => {
-  const inputValue = inputAddNameForm.value;
-  const areaFormValue = areaAddFormRow.value;
+  const inputValue = inputAddNameForm.value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
+  const areaFormValue = areaAddFormRow.value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
 
   inputValue === '' || areaFormValue === ''
     ? validateForm()
@@ -170,11 +178,11 @@ function initAddLikesListenerForEnter() {
 
 
 // Вешаем обработчик событий на кнопку delete comment
-  buttonDeleteForm.addEventListener('click', () => {
-    const liEnd = ulComments.children[ulComments.children.length - 1];
-    console.log(liEnd.remove());
-  })
-  renderComments();
+buttonDeleteForm.addEventListener('click', () => {
+  const liEnd = ulComments.children[ulComments.children.length - 1];
+  console.log(liEnd.remove());
+})
+renderComments();
 
 
 
@@ -183,29 +191,23 @@ function initAddLikesListenerForEnter() {
 function initAddLikesListener() {
   const likesButton = document.querySelectorAll('.like-button');
 
-// Перебираем кнопки из коллекции
+  // Перебираем кнопки из коллекции
   for (const likeButton of likesButton) {
-// Вызываем слушатель событий для каждой кнопки
+    // Вызываем слушатель событий для каждой кнопки
     likeButton.addEventListener('click', () => {
       // Обозначаем элемент span
-      const likesCounterElement = likeButton.previousElementSibling;
-      const likesCounter = parseInt(likesCounterElement.textContent);
+      const index = likeButton.dataset.index;
 
       // Условное ветвление для отображеня изменений кнопки и счётчика
-      if (likeButton.dataset.activeLike === 'false') {
-        likeButton.dataset.activeLike = 'true'
-        likesCounterElement.dataset.count++
-        likesCounterElement.textContent = likesCounter + 1;
-        
+      if (usersComments[index].isLike === false) {
+        usersComments[index].isLike = true
+        usersComments[index].count++
+
       } else {
-        likeButton.dataset.activeLike = 'false'
-        likesCounterElement.dataset.count--
-        likesCounterElement.textContent = likesCounter - 1;
+        usersComments[index].isLike = false
+        usersComments[index].count--
       }
-      
-      
-            // const index = likesCounterElement.dataset.index;
-            // console.log(usersComments.find(item => item === index))
+      renderComments()
     })
-    }
   }
+}
