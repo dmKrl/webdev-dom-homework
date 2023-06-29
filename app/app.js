@@ -6,7 +6,8 @@ const usersComments = [
     date: '12.02.22 12:18',
     comment: 'Это будет первый комментарий на этой странице',
     isLike: false,
-    count: 3
+    count: 3,
+    isEdit: false
 
   },
   {
@@ -14,7 +15,8 @@ const usersComments = [
     date: '13.02.22 19:22',
     comment: 'Мне нравится как оформлена эта страница! ❤',
     isLike: true,
-    count: 75
+    count: 75,
+    isEdit: false
   }
 ]
 
@@ -66,12 +68,12 @@ const renderComments = () => {
     .map((user, index) => {
       return `
       <li class="comment">
-      <div class="comment-header">
+      <div class="comment-header" data-index="${index}">
         <div>${user.name}</div>
         <div>${user.date}</div>
       </div>
-      <div class="comment-body">
-        <div class="comment-text">
+      <div class="comment-body" >
+        <div class="comment-text" style="white-space: pre-line" data-index="${index}">
           ${user.comment}
         </div>
       </div>
@@ -81,19 +83,23 @@ const renderComments = () => {
           <button class="like-button" data-index="${index}" data-active-like="${user.isLike}"></button>
         </div>
       </div>
+      <div class="edit">
+      <button class="edit-button edit-hidden" data-index="${index}" data-hidden="${user.isEdit}">Редактировать</button>
+      <button class="edit-button-save edit-hidden" data-index="${index}" data-hidden="${!user.isEdit}">Сохранить</button>
+    </div>
+
+
     </li>`
     })
     .join('');
 
   ulComments.innerHTML = usersHtml;
 
-  inputAddNameForm.value = '';
-  areaAddFormRow.value = '';
 
   inputAddNameForm.classList.remove('error');
   areaAddFormRow.classList.remove('error');
 
-  initAddLikesListener()
+  // initAddLikesAndEditButtonListener()
   initAddLikesListenerForEnter();
 }
 renderComments();
@@ -107,9 +113,14 @@ function appendComment(userName, userComment, userDate) {
     date: userDate,
     comment: userComment,
     isLike: false,
-    count: 0
+    count: 0,
+    isEdit: false
 
   })
+
+  inputAddNameForm.value = '';
+  areaAddFormRow.value = '';
+
   renderComments();
 }
 console.log(typeof usersComments)
@@ -147,12 +158,17 @@ const handleFormSubmission = () => {
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;");
+    .replaceAll('"', "&quot;")
+
   const areaFormValue = areaAddFormRow.value
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;");
+    .replaceAll('"', "&quot;")
+    .replaceAll("QUOTE_BEGIN", "<div class='quote'>")
+    .replaceAll("QUOTE_END", "</div>")
+
+
 
   inputValue === '' || areaFormValue === ''
     ? validateForm()
@@ -182,32 +198,79 @@ buttonDeleteForm.addEventListener('click', () => {
   const liEnd = ulComments.children[ulComments.children.length - 1];
   console.log(liEnd.remove());
 })
-renderComments();
 
 
 
-// // Функция обработчика кликов по кнопке лайк
-// let counter = document.querySelectorAll('span')
-function initAddLikesListener() {
-  const likesButton = document.querySelectorAll('.like-button');
+// Функция изменения кнопки лайка и редактирования комментария
+function initAddLikesAndEditButtonListener() {
+  const textCommentsElements = document.querySelectorAll('.comment-text');
+  const textCommentArr = Array.from(textCommentsElements)
+  console.log(textCommentArr)
 
-  // Перебираем кнопки из коллекции
-  for (const likeButton of likesButton) {
-    // Вызываем слушатель событий для каждой кнопки
-    likeButton.addEventListener('click', () => {
-      // Обозначаем элемент span
-      const index = likeButton.dataset.index;
 
+  ulComments.addEventListener('click', function (event) {
+    const target = event.target;
+    const index = target.dataset.index;
+    const textarea = document.createElement('textarea');
+    textarea.classList.add('area-edit');
+    // console.log(textarea)
+
+
+    // Проверка на таргет кнопки лайка
+    if (target.closest('.like-button')) {
       // Условное ветвление для отображеня изменений кнопки и счётчика
       if (usersComments[index].isLike === false) {
-        usersComments[index].isLike = true
-        usersComments[index].count++
+        usersComments[index].isLike = true;
+        usersComments[index].count++;
+        console.log(usersComments[index].isLike)
 
       } else {
-        usersComments[index].isLike = false
-        usersComments[index].count--
+        usersComments[index].isLike = false;
+        usersComments[index].count--;
       }
-      renderComments()
-    })
-  }
+    }
+
+
+    // Проверка на таргет кнопки редактировать и сохранить
+    if (target.closest('.edit-button') || target.closest('.edit-button-save')) {
+      console.log(usersComments[index].isEdit)
+
+      // Изменение кнопки в зависимости от состояния inputa
+      if (usersComments[index].isEdit === false) {
+        // Скрываем div
+        textCommentArr[index].style.display = 'none';
+        // Получаем значение из div в textarea
+        textarea.value = textCommentArr[index].innerHTML;
+        // Вставляем HTML после div
+        textCommentArr[index].after(textarea);
+        textarea.focus();
+
+        console.log(textCommentArr[index])
+        console.log(usersComments[index])
+        usersComments[index].isEdit = true;
+
+      } else {
+        // Сохранение значения из поля ввода в div
+        textCommentArr[index].innerHTML = textarea.value;
+
+        // Удалить поле ввода и удалить стиль скрывающий div
+        textarea.remove();
+        textCommentArr[index].style.display = '';
+
+        console.log(textCommentArr[index])
+
+        usersComments[index].isEdit = false;
+      }
+    }
+
+    // Реализация ответа на комментарий
+    if (target.closest('.comment-text')) {
+      console.log(lastComment[index])
+      areaAddFormRow.value = `QUOTE_BEGIN > ${usersComments[index].name}
+  ${usersComments[index].comment} QUOTE_END`
+    }
+    renderComments();
+
+  })
 }
+initAddLikesAndEditButtonListener()
