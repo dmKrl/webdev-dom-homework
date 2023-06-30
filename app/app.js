@@ -34,6 +34,9 @@ const lastComment = document.querySelectorAll('.comment');
 const ulComments = document.querySelector('.comments');
 const myDate = new Date();
 
+// const textarea = document.createElement('textarea');
+// textarea.classList.add('area-edit');
+// console.log(textarea)
 
 const arrayInputs = [inputAddNameForm, areaAddFormRow]
 
@@ -72,14 +75,17 @@ const renderComments = () => {
         <div>${user.name}</div>
         <div>${user.date}</div>
       </div>
-      <div class="comment-body" >
-        <div class="comment-text" style="white-space: pre-line" data-index="${index}">
+      <div class="comment-body">
+        <div class="comment-area edit-hidden" data-hidden="${!user.isEdit}">
+         <textarea class="comment-area-edit" type="textarea" name="edit-text "data-index="${index}">фвывфы</textarea>
+        </div>
+        <div class="comment-text edit-hidden" style="white-space: pre-line" data-hidden="${user.isEdit}" data-index="${index}">
           ${user.comment}
         </div>
       </div>
       <div class="comment-footer">
         <div class="likes">
-          <span class="likes-counter" data-index="${index}" data-count="${user.count}" value="${user.count}">${user.count}</span>
+          <span class="likes-counter" data-index="${index}" data-count="${user.count}">${user.count}</span>
           <button class="like-button" data-index="${index}" data-active-like="${user.isLike}"></button>
         </div>
       </div>
@@ -95,6 +101,9 @@ const renderComments = () => {
 
   ulComments.innerHTML = usersHtml;
 
+  // Обработчики событий на наличие данных в input
+  inputAddNameForm.addEventListener('input', handleInput);
+  areaAddFormRow.addEventListener('input', handleInput);
 
   inputAddNameForm.classList.remove('error');
   areaAddFormRow.classList.remove('error');
@@ -114,7 +123,7 @@ function appendComment(userName, userComment, userDate) {
     comment: userComment,
     isLike: false,
     count: 0,
-    isEdit: false
+    isEdit: false,
 
   })
 
@@ -143,13 +152,6 @@ function validateForm() {
 function handleInput() {
   buttonAddForm.disabled = arrayInputs.some(input => !input.value.length);
 }
-
-
-
-// Обработчики событий на наличие данных в input
-inputAddNameForm.addEventListener('input', handleInput);
-areaAddFormRow.addEventListener('input', handleInput);
-
 
 
 // Вынесли отдельно код для обработчика событий
@@ -203,18 +205,13 @@ buttonDeleteForm.addEventListener('click', () => {
 
 // Функция изменения кнопки лайка и редактирования комментария
 function initAddLikesAndEditButtonListener() {
-  const textCommentsElements = document.querySelectorAll('.comment-text');
-  const textCommentArr = Array.from(textCommentsElements)
-  console.log(textCommentArr)
+  const textCommentsEditArea = document.querySelectorAll('.comment-area-edit')
+  const arrCommentsEditArea = Array.from(textCommentsEditArea)
 
-
+  // Слушатель события на список, поиск тригера(делегирование)
   ulComments.addEventListener('click', function (event) {
     const target = event.target;
     const index = target.dataset.index;
-    const textarea = document.createElement('textarea');
-    textarea.classList.add('area-edit');
-    // console.log(textarea)
-
 
     // Проверка на таргет кнопки лайка
     if (target.closest('.like-button')) {
@@ -230,38 +227,23 @@ function initAddLikesAndEditButtonListener() {
       }
     }
 
-
     // Проверка на таргет кнопки редактировать и сохранить
     if (target.closest('.edit-button') || target.closest('.edit-button-save')) {
       console.log(usersComments[index].isEdit)
 
       // Изменение кнопки в зависимости от состояния inputa
       if (usersComments[index].isEdit === false) {
-        // Скрываем div
-        textCommentArr[index].style.display = 'none';
-        // Получаем значение из div в textarea
-        textarea.value = textCommentArr[index].innerHTML;
-        // Вставляем HTML после div
-        textCommentArr[index].after(textarea);
-        textarea.focus();
 
-        console.log(textCommentArr[index])
         console.log(usersComments[index])
         usersComments[index].isEdit = true;
 
       } else {
-        // Сохранение значения из поля ввода в div
-        textCommentArr[index].innerHTML = textarea.value;
-
-        // Удалить поле ввода и удалить стиль скрывающий div
-        textarea.remove();
-        textCommentArr[index].style.display = '';
-
-        console.log(textCommentArr[index])
-
+        console.log(usersComments[index].comment)
         usersComments[index].isEdit = false;
+        usersComments[index].comment = arrCommentsEditArea[index].innerText;
       }
     }
+
 
     // Реализация ответа на комментарий
     if (target.closest('.comment-text')) {
@@ -270,7 +252,7 @@ function initAddLikesAndEditButtonListener() {
   ${usersComments[index].comment} QUOTE_END`
     }
     renderComments();
-
   })
 }
+
 initAddLikesAndEditButtonListener()

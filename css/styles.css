@@ -188,9 +188,9 @@ body {
   }
 
 
-  .area-edit {
-    margin-top: 12px;
-    padding: 22px;
+  .comment-area-edit {
+    margin-top: 20px;
+    padding: 36px;
     resize: none;
   }
 
