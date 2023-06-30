@@ -162,3 +162,45 @@ body {
   .error {
     background-color: #bcec30;
   }
+
+  .edit-button {
+    margin-top: 24px;
+    font-size: 20px;
+    padding: 8px 12px;
+    background-color: #bcec30;
+    border: none;
+    border-radius: 18px;
+    cursor: pointer;
+  }
+
+  .edit-button-save {
+    margin-top: 24px;
+    font-size: 20px;
+    padding: 8px 12px;
+    background-color: #bcec30;
+    border: none;
+    border-radius: 18px;
+    cursor: pointer;
+  }
+
+  .edit-hidden[data-hidden="true"] {
+    display: none;
+  }
+
+
+  .comment-area-edit {
+    margin-top: 20px;
+    padding: 36px;
+    resize: none;
+  }
+
+  .quote {
+    margin-top: 24px;
+    font-size: 24px;
+    padding: 10px 20px;
+    color: rgb(255, 255, 255);
+    background-color: #854db2;
+    border: none;
+    border-radius: 18px;
+    cursor: pointer;
+  }
