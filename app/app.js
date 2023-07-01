@@ -74,7 +74,7 @@ const renderComments = () => {
       </div>
       <div class="comment-body">
         <div class="comment-area edit-hidden" data-hidden="${!user.isEdit}">
-         <textarea class="comment-area-edit" type="textarea" name="edit-text "data-index="${index}">фвывфы</textarea>
+         <textarea class="comment-area-edit" type="textarea" name="edit-text "data-index="${index}">${user.comment}</textarea>
         </div>
         <div class="comment-text edit-hidden" style="white-space: pre-line" data-hidden="${
           user.isEdit
@@ -225,7 +225,8 @@ function initAddLikesAndEditButtonListener() {
       } else {
         console.log(usersComments[index].comment);
         usersComments[index].isEdit = false;
-        usersComments[index].comment = arrCommentsEditArea[index].innerText;
+        console.log(arrCommentsEditArea[index])
+        usersComments[index].comment = arrCommentsEditArea[index].value;
       }
       renderComments();
     }
