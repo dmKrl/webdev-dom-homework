@@ -278,3 +278,6 @@ function initAddLikesAndEditButtonListener() {
   });
 }
 initAddLikesAndEditButtonListener();
+
+
+// Проверка работы ветки в ветке
