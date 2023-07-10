@@ -12,6 +12,10 @@ const buttonAddForm = document.querySelector('.add-form-button');
 
 const lastComment = document.querySelectorAll('.comment');
 const ulComments = document.querySelector('.comments');
+
+const promiseLoad = document.querySelector('.promise-load');
+const promiseAdd = document.querySelector('.promise-add');
+
 let myDate = new Date();
 
 const arrayInputs = [inputAddNameForm, areaAddFormRow];
@@ -45,15 +49,14 @@ const dateForComments = (date) => {
 function getUsersComments() {
   const url = `https://wedev-api.sky.pro/api/v1/kralichkin-dmitry/comments`;
 
-  const fetchPromise = fetch(url, {
+    return fetch(url, {
     method: 'GET',
-  });
-
-  fetchPromise.then((response) => {
-    const jsonPromise = response.json();
-
-    jsonPromise.then((responseData) => {
-      const appComments = responseData.comments.map((comment) => {
+  })
+    .then((response) => {
+      return response.json();
+    })
+    .then((responseData) => {
+      return responseData.comments.map((comment) => {
         return {
           name: comment.author.name,
           date: dateForComments(new Date(comment.date)),
@@ -63,11 +66,12 @@ function getUsersComments() {
           id: comment.id,
         };
       });
-      usersComments = appComments;
-
+    })
+    .then((response) => {
+      usersComments = response;
+      console.log(promiseLoad.classList.add('hidden'));
       renderComments();
     });
-  });
 }
 getUsersComments();
 
@@ -109,10 +113,7 @@ const renderComments = () => {
       }">Редактировать</button>
       <button class="edit-button-save edit-hidden" data-index="${index}" data-hidden="${!user.isEdit}">Сохранить</button>
     </div>
-    </li>
-    <div class="comment-header comment promise-pending" data-index="${index}">
-    Комментарий добавляется...
-    </div>`;
+    </li>`;
     })
     .join('');
 
@@ -134,6 +135,9 @@ renderComments();
 // Создаём фунцию-генератор карточек
 function appendComment(userName, userComment) {
   const url = `https://wedev-api.sky.pro/api/v1/kralichkin-dmitry/comments`;
+
+  form.classList.toggle('hidden');
+  promiseAdd.classList.toggle('hidden');
   // Отправляем запрос за публикацию карточки в массив
   const fetchPromise = fetch(url, {
     method: 'POST',
@@ -141,13 +145,17 @@ function appendComment(userName, userComment) {
       text: userComment,
       name: userName,
     }),
-  });
-
-  fetchPromise.then(() => getUsersComments());
-  renderComments();
-
-  inputAddNameForm.value = '';
-  areaAddFormRow.value = '';
+  })
+    .then(() => {
+      return getUsersComments();
+    })
+    .then(() => {
+      form.classList.toggle('hidden');
+      promiseAdd.classList.toggle('hidden');
+      inputAddNameForm.value = '';
+      areaAddFormRow.value = '';
+    });
+    renderComments();
 }
 
 // Валидация
@@ -186,7 +194,9 @@ const handleFormSubmission = () => {
 };
 
 // Вешаем обработчик событий на кнопку add comment
-buttonAddForm.addEventListener('click', handleFormSubmission);
+buttonAddForm.addEventListener('click', () => {
+  handleFormSubmission();
+});
 
 // Вешаем обработчик событий на клавишу enter
 function initAddLikesListenerForEnter() {

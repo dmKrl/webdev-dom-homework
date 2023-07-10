@@ -9,6 +9,9 @@
 
 <body>
   <div class="container">
+    <div class="comment-header comment promise-load" data-index="${index}">
+      Комментарии загружаются...
+      </div>
     <ul class="comments">
       <!-- Список рендерится в JS -->
     </ul>
@@ -20,6 +23,9 @@
         <button class="add-form-button-delete">Удалить последний комментарий</button>
       </div>
     </div>
+    <div class="comment-header add-form promise-add hidden" data-index="${index}">
+      Комментарий добавляется...
+      </div>
   </div>
 </body>
 

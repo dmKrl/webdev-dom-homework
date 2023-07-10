@@ -187,10 +187,9 @@ body {
     display: none;
   }
   
-  .promise-pending {
+  .hidden {
     display: none;
   }
-
   .comment-area-edit {
     margin-top: 20px;
     padding: 36px;
