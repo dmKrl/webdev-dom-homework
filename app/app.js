@@ -12,6 +12,10 @@ const buttonAddForm = document.querySelector('.add-form-button');
 
 const lastComment = document.querySelectorAll('.comment');
 const ulComments = document.querySelector('.comments');
+
+const promiseLoad = document.querySelector('.promise-load');
+const promiseAdd = document.querySelector('.promise-add');
+
 let myDate = new Date();
 
 const arrayInputs = [inputAddNameForm, areaAddFormRow];
@@ -45,31 +49,42 @@ const dateForComments = (date) => {
 function getUsersComments() {
   const url = `https://wedev-api.sky.pro/api/v1/kralichkin-dmitry/comments`;
 
-  const fetchPromise = fetch(url, {
+  return fetch(url, {
     method: 'GET',
-  });
-
-  fetchPromise.then((response) => {
-    const jsonPromise = response.json();
-
-    jsonPromise.then((responseData) => {
-      const appComments = responseData.comments.map((comment) => {
+  })
+    .then((response) => {
+      return response.json();
+    })
+    .then((responseData) => {
+      return responseData.comments.map((comment) => {
         return {
           name: comment.author.name,
           date: dateForComments(new Date(comment.date)),
           text: comment.text,
           likes: comment.likes,
           isLiked: comment.isLiked,
+          isLikeLoading: false,
           id: comment.id,
         };
       });
-      usersComments = appComments;
-
+    })
+    .then((response) => {
+      usersComments = response;
+      promiseLoad.classList.add('hidden');
+      console.log(usersComments);
       renderComments();
     });
-  });
 }
 getUsersComments();
+
+// Имитация обработки кнопки лайков
+function delay(interval = 300) {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve();
+    }, interval);
+  });
+}
 
 // Функция рендера списка комментариев
 const renderComments = () => {
@@ -98,9 +113,9 @@ const renderComments = () => {
           <span class="likes-counter" data-index="${index}" data-count="${
         user.likes
       }">${user.likes}</span>
-          <button class="like-button" data-index="${index}" data-active-like="${
+          <button class="like-button" data-index="${index}"  data-active-like="${
         user.isLiked
-      }"></button>
+      }" data-is-like-loading="${user.isLikeLoading}"></button>
         </div>
       </div>
       <div class="edit">
@@ -109,10 +124,7 @@ const renderComments = () => {
       }">Редактировать</button>
       <button class="edit-button-save edit-hidden" data-index="${index}" data-hidden="${!user.isEdit}">Сохранить</button>
     </div>
-    </li>
-    <div class="comment-header comment promise-pending" data-index="${index}">
-    Комментарий добавляется...
-    </div>`;
+    </li>`;
     })
     .join('');
 
@@ -134,20 +146,28 @@ renderComments();
 // Создаём фунцию-генератор карточек
 function appendComment(userName, userComment) {
   const url = `https://wedev-api.sky.pro/api/v1/kralichkin-dmitry/comments`;
+
+  form.classList.toggle('hidden');
+  promiseAdd.classList.toggle('hidden');
   // Отправляем запрос за публикацию карточки в массив
   const fetchPromise = fetch(url, {
     method: 'POST',
     body: JSON.stringify({
       text: userComment,
       name: userName,
+      isLikeLoading: false,
     }),
-  });
-
-  fetchPromise.then(() => getUsersComments());
+  })
+    .then(() => {
+      return getUsersComments();
+    })
+    .then(() => {
+      form.classList.toggle('hidden');
+      promiseAdd.classList.toggle('hidden');
+      inputAddNameForm.value = '';
+      areaAddFormRow.value = '';
+    });
   renderComments();
-
-  inputAddNameForm.value = '';
-  areaAddFormRow.value = '';
 }
 
 // Валидация
@@ -186,7 +206,9 @@ const handleFormSubmission = () => {
 };
 
 // Вешаем обработчик событий на кнопку add comment
-buttonAddForm.addEventListener('click', handleFormSubmission);
+buttonAddForm.addEventListener('click', () => {
+  handleFormSubmission();
+});
 
 // Вешаем обработчик событий на клавишу enter
 function initAddLikesListenerForEnter() {
@@ -215,16 +237,19 @@ function initAddLikesAndEditButtonListener() {
 
     // Проверка на таргет кнопки лайка
     if (target.closest('.like-button')) {
-      // Условное ветвление для отображеня изменений кнопки и счётчика
-      if (usersComments[index].isLiked === false) {
-        usersComments[index].isLiked = true;
-        usersComments[index].likes++;
-      } else {
-        usersComments[index].isLiked = false;
-        usersComments[index].likes--;
-      }
+      usersComments[index].isLikeLoading = true;
       renderComments();
+      // Условное ветвление для отображеня изменений кнопки и счётчика
+      delay(2000).then(() => {
+        usersComments[index].likes = usersComments[index].isLiked
+          ? usersComments[index].likes - 1
+          : usersComments[index].likes + 1;
+        usersComments[index].isLiked = !usersComments[index].isLiked;
+        usersComments[index].isLikeLoading = false;
+        renderComments();
+      });
     }
+    console.log(usersComments[index].isLikeLoading);
 
     // Проверка на таргет кнопки редактировать и сохранить
     if (target.closest('.edit-button') || target.closest('.edit-button-save')) {
