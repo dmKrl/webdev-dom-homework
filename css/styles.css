@@ -186,7 +186,10 @@ body {
   .edit-hidden[data-hidden="true"] {
     display: none;
   }
-
+  
+  .promise-pending {
+    display: none;
+  }
 
   .comment-area-edit {
     margin-top: 20px;

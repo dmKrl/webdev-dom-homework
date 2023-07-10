@@ -1,23 +1,6 @@
 'use strict';
 
-const usersComments = [
-  {
-    name: 'Глеб Фокин',
-    date: '12.02.22 12:18',
-    comment: 'Это будет первый комментарий на этой странице',
-    isLike: false,
-    count: 3,
-    isEdit: false,
-  },
-  {
-    name: 'Варвара Н.',
-    date: '13.02.22 19:22',
-    comment: 'Мне нравится как оформлена эта страница! ❤',
-    isLike: true,
-    count: 75,
-    isEdit: false,
-  },
-];
+let usersComments = [];
 
 const form = document.querySelector('.add-form');
 const formInputs = document.querySelector('.add-form-input');
@@ -29,20 +12,16 @@ const buttonAddForm = document.querySelector('.add-form-button');
 
 const lastComment = document.querySelectorAll('.comment');
 const ulComments = document.querySelector('.comments');
-const myDate = new Date();
-
-// const textarea = document.createElement('textarea');
-// textarea.classList.add('area-edit');
-// console.log(textarea)
+let myDate = new Date();
 
 const arrayInputs = [inputAddNameForm, areaAddFormRow];
 
 // Функция даты, для добавления значения 0 перед числами < 10
 const dateForComments = (date) => {
-  let data = myDate.getDate();
-  let month = myDate.getMonth();
-  let hour = myDate.getHours();
-  let minute = myDate.getMinutes();
+  let data = date.getDate();
+  let month = date.getMonth();
+  let hour = date.getHours();
+  let minute = date.getMinutes();
 
   if (data < 10) {
     data = '0' + data;
@@ -56,11 +35,41 @@ const dateForComments = (date) => {
   if (minute < 10) {
     minute = '0' + minute;
   }
-  return `${data}.${month}.${myDate
+  return `${data}.${month}.${date
     .getFullYear()
     .toString()
     .substr(-2)} ${hour}:${minute}`;
 };
+
+// Запрос на сервер для получения данных комментариев
+function getUsersComments() {
+  const url = `https://wedev-api.sky.pro/api/v1/kralichkin-dmitry/comments`;
+
+  const fetchPromise = fetch(url, {
+    method: 'GET',
+  });
+
+  fetchPromise.then((response) => {
+    const jsonPromise = response.json();
+
+    jsonPromise.then((responseData) => {
+      const appComments = responseData.comments.map((comment) => {
+        return {
+          name: comment.author.name,
+          date: dateForComments(new Date(comment.date)),
+          text: comment.text,
+          likes: comment.likes,
+          isLiked: comment.isLiked,
+          id: comment.id,
+        };
+      });
+      usersComments = appComments;
+
+      renderComments();
+    });
+  });
+}
+getUsersComments();
 
 // Функция рендера списка комментариев
 const renderComments = () => {
@@ -74,21 +83,23 @@ const renderComments = () => {
       </div>
       <div class="comment-body">
         <div class="comment-area edit-hidden" data-hidden="${!user.isEdit}">
-         <textarea class="comment-area-edit" type="textarea" name="edit-text "data-index="${index}">${user.comment}</textarea>
+         <textarea class="comment-area-edit" type="textarea" name="edit-text "data-index="${index}">${
+        user.text
+      }</textarea>
         </div>
         <div class="comment-text edit-hidden" style="white-space: pre-line" data-hidden="${
           user.isEdit
         }" data-index="${index}">
-          ${user.comment}
+          ${user.text}
         </div>
       </div>
       <div class="comment-footer">
         <div class="likes">
           <span class="likes-counter" data-index="${index}" data-count="${
-        user.count
-      }">${user.count}</span>
+        user.likes
+      }">${user.likes}</span>
           <button class="like-button" data-index="${index}" data-active-like="${
-        user.isLike
+        user.isLiked
       }"></button>
         </div>
       </div>
@@ -98,9 +109,10 @@ const renderComments = () => {
       }">Редактировать</button>
       <button class="edit-button-save edit-hidden" data-index="${index}" data-hidden="${!user.isEdit}">Сохранить</button>
     </div>
-
-
-    </li>`;
+    </li>
+    <div class="comment-header comment promise-pending" data-index="${index}">
+    Комментарий добавляется...
+    </div>`;
     })
     .join('');
 
@@ -114,27 +126,50 @@ const renderComments = () => {
   areaAddFormRow.classList.remove('error');
 
   // initAddLikesAndEditButtonListener()
+
   initAddLikesListenerForEnter();
 };
 renderComments();
 
 // Создаём фунцию-генератор карточек
-function appendComment(userName, userComment, userDate) {
-  usersComments.push({
-    name: userName,
-    date: userDate,
-    comment: userComment,
-    isLike: false,
-    count: 0,
-    isEdit: false,
+function appendComment(userName, userComment) {
+  const url = `https://wedev-api.sky.pro/api/v1/kralichkin-dmitry/comments`;
+  // Отправляем запрос за публикацию карточки в массив
+  const fetchPromise = fetch(url, {
+    method: 'POST',
+    body: JSON.stringify({
+      text: userComment,
+      name: userName,
+    }),
+  });
+
+  const fetchPromisePerson = fetch(url, {
+    method: 'GET',
+  });
+
+  fetchPromisePerson.then((response) => {
+    const jsonPromise = response.json();
+
+    jsonPromise.then((responseData) => {
+      const appComments = responseData.comments.map((comment) => {
+        return {
+          name: comment.author.name,
+          date: dateForComments(new Date(comment.date)),
+          text: comment.text,
+          likes: comment.likes,
+          isLiked: comment.isLiked,
+          id: comment.id,
+        };
+      });
+      usersComments = appComments;
+
+      renderComments();
+    });
   });
 
   inputAddNameForm.value = '';
   areaAddFormRow.value = '';
-
-  renderComments();
 }
-console.log(typeof usersComments);
 
 // Валидация
 function validateForm() {
@@ -151,7 +186,7 @@ function handleInput() {
   buttonAddForm.disabled = arrayInputs.some((input) => !input.value.length);
 }
 
-// Вынесли отдельно код для обработчика событий
+// Функция обработки при нажатии на кнопку "написать"
 const handleFormSubmission = () => {
   const inputValue = inputAddNameForm.value
     .replaceAll('&', '&amp;')
@@ -166,10 +201,9 @@ const handleFormSubmission = () => {
     .replaceAll('"', '&quot;')
     .replaceAll('QUOTE_BEGIN', "<div class='quote'>")
     .replaceAll('QUOTE_END', '</div>');
-
   inputValue === '' || areaFormValue === ''
     ? validateForm()
-    : appendComment(inputValue, areaFormValue, dateForComments(myDate));
+    : appendComment(inputValue, areaFormValue);
 };
 
 // Вешаем обработчик событий на кнопку add comment
@@ -203,13 +237,12 @@ function initAddLikesAndEditButtonListener() {
     // Проверка на таргет кнопки лайка
     if (target.closest('.like-button')) {
       // Условное ветвление для отображеня изменений кнопки и счётчика
-      if (usersComments[index].isLike === false) {
-        usersComments[index].isLike = true;
-        usersComments[index].count++;
-        console.log(usersComments[index].isLike);
+      if (usersComments[index].isLiked === false) {
+        usersComments[index].isLiked = true;
+        usersComments[index].likes++;
       } else {
-        usersComments[index].isLike = false;
-        usersComments[index].count--;
+        usersComments[index].isLiked = false;
+        usersComments[index].likes--;
       }
       renderComments();
     }
@@ -225,7 +258,7 @@ function initAddLikesAndEditButtonListener() {
       } else {
         console.log(usersComments[index].comment);
         usersComments[index].isEdit = false;
-        console.log(arrCommentsEditArea[index])
+        console.log(arrCommentsEditArea[index]);
         usersComments[index].comment = arrCommentsEditArea[index].value;
       }
       renderComments();
@@ -235,7 +268,7 @@ function initAddLikesAndEditButtonListener() {
     if (target.closest('.comment-text')) {
       console.log(lastComment[index]);
       areaAddFormRow.value = `QUOTE_BEGIN > ${usersComments[index].name}
-  ${usersComments[index].comment} QUOTE_END`;
+  ${usersComments[index].text} QUOTE_END`;
       renderComments();
     }
   });
