@@ -49,7 +49,7 @@ const dateForComments = (date) => {
 function getUsersComments() {
   const url = `https://wedev-api.sky.pro/api/v1/kralichkin-dmitry/comments`;
 
-    return fetch(url, {
+  return fetch(url, {
     method: 'GET',
   })
     .then((response) => {
@@ -63,17 +63,28 @@ function getUsersComments() {
           text: comment.text,
           likes: comment.likes,
           isLiked: comment.isLiked,
+          isLikeLoading: false,
           id: comment.id,
         };
       });
     })
     .then((response) => {
       usersComments = response;
-      console.log(promiseLoad.classList.add('hidden'));
+      promiseLoad.classList.add('hidden');
+      console.log(usersComments);
       renderComments();
     });
 }
 getUsersComments();
+
+// Имитация обработки кнопки лайков
+function delay(interval = 300) {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve();
+    }, interval);
+  });
+}
 
 // Функция рендера списка комментариев
 const renderComments = () => {
@@ -102,9 +113,9 @@ const renderComments = () => {
           <span class="likes-counter" data-index="${index}" data-count="${
         user.likes
       }">${user.likes}</span>
-          <button class="like-button" data-index="${index}" data-active-like="${
+          <button class="like-button" data-index="${index}"  data-active-like="${
         user.isLiked
-      }"></button>
+      }" data-is-like-loading="${user.isLikeLoading}"></button>
         </div>
       </div>
       <div class="edit">
@@ -144,6 +155,7 @@ function appendComment(userName, userComment) {
     body: JSON.stringify({
       text: userComment,
       name: userName,
+      isLikeLoading: false,
     }),
   })
     .then(() => {
@@ -155,7 +167,7 @@ function appendComment(userName, userComment) {
       inputAddNameForm.value = '';
       areaAddFormRow.value = '';
     });
-    renderComments();
+  renderComments();
 }
 
 // Валидация
@@ -225,16 +237,19 @@ function initAddLikesAndEditButtonListener() {
 
     // Проверка на таргет кнопки лайка
     if (target.closest('.like-button')) {
-      // Условное ветвление для отображеня изменений кнопки и счётчика
-      if (usersComments[index].isLiked === false) {
-        usersComments[index].isLiked = true;
-        usersComments[index].likes++;
-      } else {
-        usersComments[index].isLiked = false;
-        usersComments[index].likes--;
-      }
+      usersComments[index].isLikeLoading = true;
       renderComments();
+      // Условное ветвление для отображеня изменений кнопки и счётчика
+      delay(2000).then(() => {
+        usersComments[index].likes = usersComments[index].isLiked
+          ? usersComments[index].likes - 1
+          : usersComments[index].likes + 1;
+        usersComments[index].isLiked = !usersComments[index].isLiked;
+        usersComments[index].isLikeLoading = false;
+        renderComments();
+      });
     }
+    console.log(usersComments[index].isLikeLoading);
 
     // Проверка на таргет кнопки редактировать и сохранить
     if (target.closest('.edit-button') || target.closest('.edit-button-save')) {

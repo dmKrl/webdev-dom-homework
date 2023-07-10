@@ -1,3 +1,18 @@
+@keyframes rotating {
+  from {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(15deg);;
+  }
+  75% {
+    transform: rotate(-15deg);;
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
 body {
     margin: 0;
   }
@@ -85,6 +100,10 @@ body {
     background-repeat: no-repeat;
     width: 22px;
     height: 22px;
+  }
+
+  .like-button[data-is-like-loading='true'] {
+    animation: rotating 2s linear infinite;
   }
 
   .like-button[data-active-like="false"] {
