@@ -143,29 +143,8 @@ function appendComment(userName, userComment) {
     }),
   });
 
-  const fetchPromisePerson = fetch(url, {
-    method: 'GET',
-  });
-
-  fetchPromisePerson.then((response) => {
-    const jsonPromise = response.json();
-
-    jsonPromise.then((responseData) => {
-      const appComments = responseData.comments.map((comment) => {
-        return {
-          name: comment.author.name,
-          date: dateForComments(new Date(comment.date)),
-          text: comment.text,
-          likes: comment.likes,
-          isLiked: comment.isLiked,
-          id: comment.id,
-        };
-      });
-      usersComments = appComments;
-
-      renderComments();
-    });
-  });
+  fetchPromise.then(() => getUsersComments());
+  renderComments();
 
   inputAddNameForm.value = '';
   areaAddFormRow.value = '';
