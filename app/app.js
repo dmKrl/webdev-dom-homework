@@ -169,6 +169,8 @@ function appendComment(userName, userComment) {
       } else if (response.status === 400) {
         throw new Error('Имя и комментарий должны быть не короче 3 символов');
       } else {
+        /*повторный запрос на сервер при ошибке 500 */
+        appendComment(userName, userComment)
         throw new Error('Сервер сломался, попробуйте позже');
       }
     })
@@ -182,9 +184,12 @@ function appendComment(userName, userComment) {
       areaAddFormRow.value = '';
     })
     .catch((error) => {
-      if (error.message !== 'Failed to fetch'
-       ? alert(`${error.message}`)
-       : alert('Кажется, у вас сломался интернет, попробуйте позже'));
+      if (
+        error.message !== 'Failed to fetch'
+          ? alert(`${error.message}`)
+          : alert('Кажется, у вас сломался интернет, попробуйте позже')
+      );
+
       console.warn(error);
 
       form.classList.toggle('hidden');
@@ -230,8 +235,8 @@ const handleFormSubmission = () => {
 
 // Вешаем обработчик событий на кнопку add comment
 buttonAddForm.addEventListener('click', () => {
-  
   handleFormSubmission();
+  // console.log(appendComment(inputAddNameForm.value, areaAddFormRow.value))
 });
 
 // Вешаем обработчик событий на клавишу enter
