@@ -71,8 +71,11 @@ function getUsersComments() {
     .then((response) => {
       usersComments = response;
       promiseLoad.classList.add('hidden');
-      console.log(usersComments);
       renderComments();
+    })
+    .catch((error) => {
+      alert('Произошла ошибка, попробуйте повторить позже');
+      console.warn(error);
     });
 }
 getUsersComments();
@@ -156,8 +159,21 @@ function appendComment(userName, userComment) {
       text: userComment,
       name: userName,
       isLikeLoading: false,
+      forceError: true,
     }),
   })
+    .then((response) => {
+      console.log(response);
+      if (response.status === 201) {
+        return response.json();
+      } else if (response.status === 400) {
+        throw new Error('Имя и комментарий должны быть не короче 3 символов');
+      } else {
+        /*повторный запрос на сервер при ошибке 500 */
+        appendComment(userName, userComment)
+        throw new Error('Сервер сломался, попробуйте позже');
+      }
+    })
     .then(() => {
       return getUsersComments();
     })
@@ -166,6 +182,18 @@ function appendComment(userName, userComment) {
       promiseAdd.classList.toggle('hidden');
       inputAddNameForm.value = '';
       areaAddFormRow.value = '';
+    })
+    .catch((error) => {
+      if (
+        error.message !== 'Failed to fetch'
+          ? alert(`${error.message}`)
+          : alert('Кажется, у вас сломался интернет, попробуйте позже')
+      );
+
+      console.warn(error);
+
+      form.classList.toggle('hidden');
+      promiseAdd.classList.toggle('hidden');
     });
   renderComments();
 }
@@ -208,6 +236,7 @@ const handleFormSubmission = () => {
 // Вешаем обработчик событий на кнопку add comment
 buttonAddForm.addEventListener('click', () => {
   handleFormSubmission();
+  // console.log(appendComment(inputAddNameForm.value, areaAddFormRow.value))
 });
 
 // Вешаем обработчик событий на клавишу enter
@@ -253,16 +282,11 @@ function initAddLikesAndEditButtonListener() {
 
     // Проверка на таргет кнопки редактировать и сохранить
     if (target.closest('.edit-button') || target.closest('.edit-button-save')) {
-      console.log(usersComments[index].isEdit);
-
       // Изменение кнопки в зависимости от состояния inputa
       if (usersComments[index].isEdit === false) {
-        console.log(usersComments[index]);
         usersComments[index].isEdit = true;
       } else {
-        console.log(usersComments[index].comment);
         usersComments[index].isEdit = false;
-        console.log(arrCommentsEditArea[index]);
         usersComments[index].comment = arrCommentsEditArea[index].value;
       }
       renderComments();
