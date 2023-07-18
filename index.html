@@ -8,40 +8,14 @@
 
   <body>
     <div class="container">
-      <div class="comment-header comment promise-load" data-index="${index}">
+      <div class="comment-header comment promise-load">
         Комментарии загружаются...
       </div>
-      <ul class="comments">
-        <!-- Список рендерится в JS -->
-      </ul>
-      <div class="add-form">
-        <input
-          type="text"
-          class="add-form-name add-form-input"
-          placeholder="Введите ваше имя"
-        />
-        <textarea
-          type="textarea"
-          class="add-form-text add-form-input"
-          placeholder="Введите ваш коментарий"
-          rows="4"
-        ></textarea>
-        <div class="add-form-row">
-          <button class="add-form-button">Написать</button>
-          <button class="add-form-button-delete">
-            Удалить последний комментарий
-          </button>
-        </div>
-      </div>
-      <div
-        class="comment-header add-form promise-add hidden"
-        data-index="${index}"
-      >
+      <div class="comment-header add-form promise-add hidden">
         Комментарий добавляется...
       </div>
       <div class="app"></div>
     </div>
-
 
     <script src="./app/app.js" type="module"></script>
   </body>

@@ -41,9 +41,6 @@ function getTodo() {
     .then((responseData) => {
       return responseData.comments.map((comment) => {
         return {
-          headers: {
-            Athorization: `Bearer ${token}`
-          },
           name: comment.author.name,
           date: dateForComments(new Date(comment.date)),
           text: comment.text,
@@ -63,9 +60,6 @@ function postTodo(userName, userComment) {
     const fetchPromise = fetch(url, {
       method: 'POST',
       body: JSON.stringify({
-        headers: {
-          Athorization: `Bearer ${token}`
-        },
         text: userComment,
         name: userName,
         isLikeLoading: false,
