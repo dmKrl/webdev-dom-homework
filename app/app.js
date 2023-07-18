@@ -2,6 +2,7 @@
 import { validateForm, handleInput } from './validate.js';
 import { getTodo, postTodo } from './api.js';
 import { renderMarkup, delay } from './render.js';
+import { renderLogin } from './loginPage.js';
 
 
 let usersComments = [];
@@ -51,7 +52,8 @@ const renderComments = () => {
 
   initAddLikesListenerForEnter();
 };
-renderComments();
+
+renderLogin();
 
 // Создаём фунцию-генератор карточек
 function appendComment(userName, userComment) {
@@ -64,6 +66,8 @@ function appendComment(userName, userComment) {
         return response.json();
       } else if (response.status === 400) {
         throw new Error('Имя и комментарий должны быть не короче 3 символов');
+      } else if (response.status === 401) {
+          throw new Error('Пользователь не авторизован')
       } else {
         /*повторный запрос на сервер при ошибке 500 */
         appendComment(userName, userComment);
