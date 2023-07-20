@@ -9,13 +9,6 @@ let usersComments = [];
 
 const form = document.querySelector('.add-form');
 const container = document.querySelector('.container');
-const inputAddNameForm = document.querySelector('.add-form-name');
-const areaAddFormRow = document.querySelector('.add-form-text');
-
-const authorizationMessage = document.querySelector('.add-text');
-const buttonDeleteForm = document.querySelector('.add-form-button-delete');
-const buttonAddForm = document.querySelector('.add-form-button');
-const ulComments = document.querySelector('.comments');
 
 const promiseLoad = document.querySelector('.promise-load');
 const promiseAdd = document.querySelector('.promise-add');
@@ -27,7 +20,12 @@ function getUsersComments() {
       console.log(response);
       usersComments = response;
       promiseLoad.classList.add('hidden');
-      renderMarkup({ usersComments, renderLogin, fetchPromiseWithAuthorization, container });
+      renderMarkup({
+        usersComments,
+        renderLogin,
+        fetchPromiseWithAuthorization,
+        container,
+      });
     })
     .catch((error) => {
       console.log(error);
@@ -37,7 +35,6 @@ function getUsersComments() {
 // Отображение списка комментариев на экране неавторизованному пользователю
 getUsersComments();
 
-
 // Запрос на сервер для получения данных комментариев с авторизацией
 function fetchPromiseWithAuthorization() {
   getTodoWithAuthorization()
@@ -46,9 +43,10 @@ function fetchPromiseWithAuthorization() {
       usersComments = response;
       promiseLoad.classList.add('hidden');
       renderAuthorizationPage({
-        handleInput,
-        handleFormSubmission,
         usersComments,
+        handleFormSubmission,
+        delay,
+        handleInput,
       });
     })
     .catch((error) => {
@@ -59,6 +57,8 @@ function fetchPromiseWithAuthorization() {
 
 // Создаём фунцию-генератор карточек
 function appendComment(userName, userComment) {
+  const areaAddFormRow = document.querySelector('.add-form-text');
+  const inputAddNameForm = document.querySelector('.add-form-name');
   form.classList.toggle('hidden');
   promiseAdd.classList.toggle('hidden');
 
@@ -77,7 +77,7 @@ function appendComment(userName, userComment) {
       }
     })
     .then(() => {
-      return getUsersComments();
+      return fetchPromiseWithAuthorization();
     })
     .then(() => {
       form.classList.toggle('hidden');
@@ -94,11 +94,13 @@ function appendComment(userName, userComment) {
       form.classList.toggle('hidden');
       promiseAdd.classList.toggle('hidden');
     });
-  renderMarkup({usersComments});
+    renderAuthorizationPage({ usersComments, handleFormSubmission, delay, handleInput });
 }
 
 // Функция обработки при нажатии на кнопку "написать"
 function handleFormSubmission() {
+  const inputAddNameForm = document.querySelector('.add-form-name');
+  const areaAddFormRow = document.querySelector('.add-form-text');
   const inputValue = inputAddNameForm.value
     .replaceAll('&', '&amp;')
     .replaceAll('<', '&lt;')
@@ -113,74 +115,6 @@ function handleFormSubmission() {
     .replaceAll('QUOTE_BEGIN', "<div class='quote'>")
     .replaceAll('QUOTE_END', '</div>');
   inputValue === '' || areaFormValue === ''
-    ? validateForm()
+    ? validateForm(inputValue, areaAddFormRow)
     : appendComment(inputValue, areaFormValue);
 }
-
-
-
-// // Вешаем обработчик событий на кнопку add comment
-// buttonAddForm.addEventListener('click', () => {
-//   handleFormSubmission();
-// });
-
-// // Вешаем обработчик событий на клавишу enter
-// function initAddLikesListenerForEnter() {
-//   document.addEventListener('keyup', (event) => {
-//     if (event.code === 'Enter') {
-//       handleFormSubmission();
-//     }
-//   });
-// }
-
-// // Вешаем обработчик событий на кнопку delete comment
-// buttonDeleteForm.addEventListener('click', () => {
-//   const liEnd = ulComments.children[ulComments.children.length - 1];
-// });
-
-// // Функция изменения кнопки лайка и редактирования комментария
-// function initAddLikesAndEditButtonListener() {
-//   const textCommentsEditArea = document.querySelectorAll('.comment-area-edit');
-//   const arrCommentsEditArea = Array.from(textCommentsEditArea);
-
-//   // Слушатель события на список, поиск тригера(делегирование)
-//   ulComments.addEventListener('click', function (event) {
-//     const target = event.target;
-//     const index = target.dataset.index;
-
-//     // Проверка на таргет кнопки лайка
-//     if (target.closest('.like-button')) {
-//       usersComments[index].isLikeLoading = true;
-//       renderMarkup({usersComments});
-//       // Условное ветвление для отображеня изменений кнопки и счётчика
-//       delay(2000).then(() => {
-//         usersComments[index].likes = usersComments[index].isLiked
-//           ? usersComments[index].likes - 1
-//           : usersComments[index].likes + 1;
-//         usersComments[index].isLiked = !usersComments[index].isLiked;
-//         usersComments[index].isLikeLoading = false;
-//         renderMarkup({usersComments});
-//       });
-//     }
-
-//     // Проверка на таргет кнопки редактировать и сохранить
-//     if (target.closest('.edit-button') || target.closest('.edit-button-save')) {
-//       // Изменение кнопки в зависимости от состояния inputa
-//       if (usersComments[index].isEdit === false) {
-//         usersComments[index].isEdit = true;
-//       } else {
-//         usersComments[index].isEdit = false;
-//         usersComments[index].comment = arrCommentsEditArea[index].value;
-//       }
-//       renderMarkup({usersComments});
-//     }
-
-//     // Реализация ответа на комментарий
-//     if (target.closest('.comment-text')) {
-//       areaAddFormRow.value = `QUOTE_BEGIN > ${usersComments[index].name}
-//   ${usersComments[index].text} QUOTE_END`;
-//       renderMarkup({usersComments});
-//     }
-//   });
-// }
-// initAddLikesAndEditButtonListener();

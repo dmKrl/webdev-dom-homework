@@ -4,7 +4,7 @@ const buttonAddForm = document.querySelector('.add-form-button');
 const arrayInputs = [inputAddNameForm, areaAddFormRow];
 
 // Валидация
-function validateForm() {
+function validateForm(inputAddNameForm, areaAddFormRow) {
   if (inputAddNameForm.value === '') {
     inputAddNameForm.classList.add('error');
   }
