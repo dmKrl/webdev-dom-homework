@@ -8,19 +8,16 @@
 </head>
 
 <body>
-  <div class="container">
-    <div class="comment-header comment promise-load" data-index="${index}">
-      Комментарии загружаются...
-      </div>
-    <ul class="comments">
-      <!-- Список рендерится в JS -->
-    </ul>
-    <p class="add-text">Чтобы добавить комментарий, <button class="add-button">авторизуйтесь</button></p>
-    <div class="comment-header add-form promise-add hidden" data-index="${index}">
-      Комментарий добавляется...
-      </div>
+  <div class="app">
+    <div class="container">
+      <div class="comment-header comment promise-load" data-index="">
+        Комментарии загружаются...
+        </div>
+      <div class="comment-header add-form promise-add hidden" data-index="${index}">
+        Комментарий добавляется...
+        </div>
+    </div>
   </div>
-  <div class="app"></div>
 </body>
 
 <script src="./app/app.js" type="module"></script>

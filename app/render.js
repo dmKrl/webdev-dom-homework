@@ -58,6 +58,8 @@ function renderAuthorizationPage({ handleInput, handleFormSubmission, usersComme
   </div>`;
 
   const form = document.querySelector('.add-form');
+  const app = document.querySelector('.app');
+
   const container = document.querySelector('.container');
   const inputAddNameForm = document.querySelector('.add-form-name');
   const areaAddFormRow = document.querySelector('.add-form-text');

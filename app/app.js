@@ -1,20 +1,18 @@
 'use strict';
 import { validateForm, handleInput } from './validate.js';
 import { getTodo, postTodo, getTodoWithAuthorization } from './api.js';
-import { renderAuthorizationPage } from './render.js'
+import { renderAuthorizationPage } from './render.js';
 import { renderMarkup, delay } from './renderMarkup.js';
 import { renderLogin } from './loginPage.js';
-
 
 let usersComments = [];
 
 const form = document.querySelector('.add-form');
-const container = document.querySelector('.container')
+const container = document.querySelector('.container');
 const inputAddNameForm = document.querySelector('.add-form-name');
 const areaAddFormRow = document.querySelector('.add-form-text');
 
-const authorizationMessage = document.querySelector('.add-text') 
-const buttonAuthorization = document.querySelector('.add-button') 
+const authorizationMessage = document.querySelector('.add-text');
 const buttonDeleteForm = document.querySelector('.add-form-button-delete');
 const buttonAddForm = document.querySelector('.add-form-button');
 const ulComments = document.querySelector('.comments');
@@ -22,21 +20,21 @@ const ulComments = document.querySelector('.comments');
 const promiseLoad = document.querySelector('.promise-load');
 const promiseAdd = document.querySelector('.promise-add');
 
-
 // Запрос на сервер для получения данных комментариев без авторизации
 function getUsersComments() {
   getTodo()
     .then((response) => {
-      console.log(response)
+      console.log(response);
       usersComments = response;
       promiseLoad.classList.add('hidden');
-      renderComments();
+      renderMarkup({ usersComments, renderLogin, fetchPromiseWithAuthorization, container });
     })
     .catch((error) => {
-      console.log(error)
+      console.log(error);
       alert('Произошла ошибка, попробуйте повторить позже');
     });
 }
+// Отображение списка комментариев на экране неавторизованному пользователю
 getUsersComments();
 
 
@@ -44,37 +42,20 @@ getUsersComments();
 function fetchPromiseWithAuthorization() {
   getTodoWithAuthorization()
     .then((response) => {
-      console.log(response)
+      console.log(response);
       usersComments = response;
       promiseLoad.classList.add('hidden');
-      renderAuthorizationPage({ handleInput, handleFormSubmission, usersComments });
+      renderAuthorizationPage({
+        handleInput,
+        handleFormSubmission,
+        usersComments,
+      });
     })
     .catch((error) => {
-      console.log(error)
+      console.log(error);
       alert('Произошла ошибка, попробуйте повторить позже');
     });
 }
-
-// Функция рендера списка комментариев
-function renderComments () {
-  const usersHtml = usersComments
-    .map((user, index) => {
-      return renderMarkup(user, index)
-    })
-    .join('');
-
-  ulComments.innerHTML = usersHtml;
-
-  // Обработчики событий на наличие данных в input
-  inputAddNameForm.addEventListener('input', handleInput);
-  areaAddFormRow.addEventListener('input', handleInput);
-
-  inputAddNameForm.classList.remove('error');
-  areaAddFormRow.classList.remove('error');
-
-  initAddLikesListenerForEnter();
-};
-
 
 // Создаём фунцию-генератор карточек
 function appendComment(userName, userComment) {
@@ -113,11 +94,11 @@ function appendComment(userName, userComment) {
       form.classList.toggle('hidden');
       promiseAdd.classList.toggle('hidden');
     });
-  renderComments();
+  renderMarkup({usersComments});
 }
 
 // Функция обработки при нажатии на кнопку "написать"
-function handleFormSubmission () {
+function handleFormSubmission() {
   const inputValue = inputAddNameForm.value
     .replaceAll('&', '&amp;')
     .replaceAll('<', '&lt;')
@@ -134,38 +115,28 @@ function handleFormSubmission () {
   inputValue === '' || areaFormValue === ''
     ? validateForm()
     : appendComment(inputValue, areaFormValue);
-  };    
-  
-
-
-  // Слушатель событий на кнопке авторизоваться
-  buttonAuthorization.addEventListener('click', () => {
-    console.log('click')
-    container.classList.toggle('hidden');
-    renderLogin({ fetchPromiseWithAuthorization })
-  })
+}
 
 
 
 // // Вешаем обработчик событий на кнопку add comment
 // buttonAddForm.addEventListener('click', () => {
-//   handleFormSubmission();  
+//   handleFormSubmission();
 // });
 
 // // Вешаем обработчик событий на клавишу enter
 // function initAddLikesListenerForEnter() {
 //   document.addEventListener('keyup', (event) => {
 //     if (event.code === 'Enter') {
-//       handleFormSubmission();  
+//       handleFormSubmission();
 //     }
 //   });
 // }
 
 // // Вешаем обработчик событий на кнопку delete comment
 // buttonDeleteForm.addEventListener('click', () => {
-//   const liEnd = ulComments.children[ulComments.children.length - 1];  
+//   const liEnd = ulComments.children[ulComments.children.length - 1];
 // });
-
 
 // // Функция изменения кнопки лайка и редактирования комментария
 // function initAddLikesAndEditButtonListener() {
@@ -180,7 +151,7 @@ function handleFormSubmission () {
 //     // Проверка на таргет кнопки лайка
 //     if (target.closest('.like-button')) {
 //       usersComments[index].isLikeLoading = true;
-//       renderComments();
+//       renderMarkup({usersComments});
 //       // Условное ветвление для отображеня изменений кнопки и счётчика
 //       delay(2000).then(() => {
 //         usersComments[index].likes = usersComments[index].isLiked
@@ -188,7 +159,7 @@ function handleFormSubmission () {
 //           : usersComments[index].likes + 1;
 //         usersComments[index].isLiked = !usersComments[index].isLiked;
 //         usersComments[index].isLikeLoading = false;
-//         renderComments();
+//         renderMarkup({usersComments});
 //       });
 //     }
 
@@ -201,14 +172,14 @@ function handleFormSubmission () {
 //         usersComments[index].isEdit = false;
 //         usersComments[index].comment = arrCommentsEditArea[index].value;
 //       }
-//       renderComments();
+//       renderMarkup({usersComments});
 //     }
 
 //     // Реализация ответа на комментарий
 //     if (target.closest('.comment-text')) {
 //       areaAddFormRow.value = `QUOTE_BEGIN > ${usersComments[index].name}
 //   ${usersComments[index].text} QUOTE_END`;
-//       renderComments();
+//       renderMarkup({usersComments});
 //     }
 //   });
 // }
