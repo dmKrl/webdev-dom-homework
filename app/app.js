@@ -1,15 +1,19 @@
 'use strict';
 import { validateForm, handleInput } from './validate.js';
-import { getTodo, postTodo } from './api.js';
-import { renderMarkup, delay } from './render.js';
+import { getTodo, postTodo, getTodoWithAuthorization } from './api.js';
+import { renderMarkup, delay } from './renderMarkup.js';
+import { renderLogin } from './loginPage.js';
 
 
 let usersComments = [];
 
 const form = document.querySelector('.add-form');
+const container = document.querySelector('.container')
 const inputAddNameForm = document.querySelector('.add-form-name');
 const areaAddFormRow = document.querySelector('.add-form-text');
 
+const authorizationMessage = document.querySelector('.add-text') 
+const buttonAuthorization = document.querySelector('.add-button') 
 const buttonDeleteForm = document.querySelector('.add-form-button-delete');
 const buttonAddForm = document.querySelector('.add-form-button');
 const ulComments = document.querySelector('.comments');
@@ -22,6 +26,7 @@ const promiseAdd = document.querySelector('.promise-add');
 function getUsersComments() {
   getTodo()
     .then((response) => {
+      console.log(response)
       usersComments = response;
       promiseLoad.classList.add('hidden');
       renderComments();
@@ -32,8 +37,23 @@ function getUsersComments() {
 }
 getUsersComments();
 
+
+// Запрос на сервер для получения данных комментариев
+function fetchPromiseWithAuthorization() {
+  getTodoWithAuthorization()
+    .then((response) => {
+      console.log(response)
+      usersComments = response;
+      promiseLoad.classList.add('hidden');
+      renderComments();
+    })
+    .catch((error) => {
+      alert('Произошла ошибка, попробуйте повторить позже');
+    });
+}
+
 // Функция рендера списка комментариев
-const renderComments = () => {
+function renderComments () {
   const usersHtml = usersComments
     .map((user, index) => {
       return renderMarkup(user, index)
@@ -51,7 +71,7 @@ const renderComments = () => {
 
   initAddLikesListenerForEnter();
 };
-renderComments();
+
 
 // Создаём фунцию-генератор карточек
 function appendComment(userName, userComment) {
@@ -62,6 +82,8 @@ function appendComment(userName, userComment) {
     .then((response) => {
       if (response.status === 201) {
         return response.json();
+      } else if (response.status === 401) {
+        throw new Error('Вы не авторизованы');
       } else if (response.status === 400) {
         throw new Error('Имя и комментарий должны быть не короче 3 символов');
       } else {
@@ -129,6 +151,14 @@ function initAddLikesListenerForEnter() {
 buttonDeleteForm.addEventListener('click', () => {
   const liEnd = ulComments.children[ulComments.children.length - 1];
 });
+
+// Слушатель событий на кнопке авторизоваться
+buttonAuthorization.addEventListener('click', () => {
+  console.log('click')
+  container.classList.toggle('hidden');
+  renderLogin({ fetchPromiseWithAuthorization })
+})
+
 
 // Функция изменения кнопки лайка и редактирования комментария
 function initAddLikesAndEditButtonListener() {
