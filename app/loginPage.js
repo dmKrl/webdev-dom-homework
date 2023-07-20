@@ -1,10 +1,9 @@
 import { login, setToken } from './api.js';
 
-
 const renderLogin = ({ fetchPromiseWithAuthorization }) => {
   const appElement = document.querySelector('.app');
   const loginHtml = `
-<div class="container">
+<div class="container login-form">
 <div class="add-form">
   <input type="login" class="add-form-text add-form-input add-form-login" placeholder="Введите логин" />
   <input type="password" class="add-form-text add-form-input add-form-password" placeholder="Введите пароль" rows="4"></input>
@@ -15,26 +14,29 @@ const renderLogin = ({ fetchPromiseWithAuthorization }) => {
 </div>
 </div>
 `;
-appElement.innerHTML = loginHtml;
+  appElement.innerHTML = loginHtml;
 
-const container = document.querySelector('.container')
-const buttonLogin = document.querySelector('.add-form-button-enter');
-const loginInputElement = document.querySelector('.add-form-login');
-const passwordInputElement = document.querySelector('.add-form-password');
+  const container = document.querySelector('.container');
+  const loginForm = document.querySelector('.login-form');
+  const buttonLogin = document.querySelector('.add-form-button-enter');
+  const loginInputElement = document.querySelector('.add-form-login');
+  const passwordInputElement = document.querySelector('.add-form-password');
 
-buttonLogin.addEventListener('click', () => {
-    console.log('click')
-  login({
-    login: loginInputElement.value,
-    password: passwordInputElement.value,
-  }).then((responseData) => {
-    setToken(responseData.user.token);
-  }).then(() => {
-    container.classList.toggle('hidden');
-    fetchPromiseWithAuthorization();
-  })
-});
-
+  buttonLogin.addEventListener('click', () => {
+    console.log('click');
+    login({
+      login: loginInputElement.value,
+      password: passwordInputElement.value,
+    })
+      .then((responseData) => {
+        setToken(responseData.user.token);
+      })
+      .then(() => {
+        container.classList.toggle('hidden');
+        loginForm.classList.toggle('hidden')
+        fetchPromiseWithAuthorization();
+      });
+  });
 };
 
-export { renderLogin }
+export { renderLogin };
