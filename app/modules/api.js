@@ -2,11 +2,15 @@ const todosUrl = `https://wedev-api.sky.pro/api/v2/kralichkin-dmitry/comments`;
 const userUrl = `https://wedev-api.sky.pro/api/user/login`;
 
 let token;
+let name;
 
 const setToken = (newToken) => {
   token = newToken;
 };
 
+const setLoginName = (newName) => {
+  return name = newName;
+}
 // Функция даты, для добавления значения 0 перед числами < 10
 const dateForComments = (date) => {
   let data = date.getDate();
@@ -111,4 +115,4 @@ function login({ login, password }) {
     return response.json();
   });
 }
-export { getTodo, postTodo, login, setToken, token, getTodoWithAuthorization };
+export { getTodo, postTodo, login, setToken, token, getTodoWithAuthorization, setLoginName, name };

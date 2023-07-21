@@ -5,11 +5,11 @@ import {
   initAddLikesListenerForEnter,
   initAddLikesAndEditButtonListener,
 } from './handlers.js';
+import { name } from './api.js';
 
 function renderAuthorizationPage({
   usersComments,
   handleFormSubmission,
-  delay,
   handleInput,
 }) {
   const usersHtml = usersComments
@@ -53,28 +53,34 @@ function renderAuthorizationPage({
     .join('');
 
   const appHtml = `
+  <div class="container">
     <ul class="comments">
       ${usersHtml}
     </ul>
     <div class="add-form">
-      <input type="text" class="add-form-name add-form-input" placeholder="Введите ваше имя" />
+      <input type="text" class="add-form-name add-form-input" placeholder="${name}" value="${name}" readonly/>
       <textarea type="textarea" class="add-form-text add-form-input" placeholder="Введите ваш коментарий" rows="4"></textarea>
       <div class="add-form-row">
         <button class="add-form-button">Написать</button>
         <button class="add-form-button-delete">Удалить последний комментарий</button>
       </div>
-    </div>`;
+    </div>
+    <div class="comment-header add-form promise-add hidden" data-index="">
+    Комментарий добавляется...
+    </div>
+</div>
+`;
 
-  const container = document.querySelector('.container');
-
-  container.innerHTML = appHtml;
+  const app = document.querySelector('.app');
+  app.innerHTML = appHtml;
 
   const ulComments = document.querySelector('.comments');
   const buttonAddForm = document.querySelector('.add-form-button');
   const areaAddFormRow = document.querySelector('.add-form-text');
-  const inputAddNameForm = document.querySelector('.add-form-name');
+  // const inputAddFormRow = document.querySelector('.add-form-name');
 
-  clearingFields({ handleInput, inputAddNameForm, areaAddFormRow });
+  // handleFormSubmission({ areaAddFormRow, inputAddFormRow })
+  clearingFields({ handleInput, areaAddFormRow, buttonAddForm });
   initAddComments({ buttonAddForm, handleFormSubmission });
   initAddLikesListenerForEnter({ handleFormSubmission });
   initAddLikesAndEditButtonListener({

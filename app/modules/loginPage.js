@@ -1,4 +1,4 @@
-import { login, setToken } from './api.js';
+import { login, setToken, setLoginName, name } from './api.js';
 
 const renderLogin = ({ fetchPromiseWithAuthorization }) => {
   const appElement = document.querySelector('.app');
@@ -16,8 +16,6 @@ const renderLogin = ({ fetchPromiseWithAuthorization }) => {
 `;
   appElement.innerHTML = loginHtml;
 
-  const container = document.querySelector('.container');
-  const loginForm = document.querySelector('.login-form');
   const buttonLogin = document.querySelector('.add-form-button-enter');
   const loginInputElement = document.querySelector('.add-form-login');
   const passwordInputElement = document.querySelector('.add-form-password');
@@ -30,10 +28,10 @@ const renderLogin = ({ fetchPromiseWithAuthorization }) => {
     })
       .then((responseData) => {
         setToken(responseData.user.token);
+        setLoginName(responseData.user.name);
+        console.log(name);
       })
       .then(() => {
-        container.classList.toggle('hidden');
-        loginForm.classList.toggle('hidden')
         fetchPromiseWithAuthorization();
       });
   });

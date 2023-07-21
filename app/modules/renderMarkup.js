@@ -1,7 +1,11 @@
 // Функция рендера списка комментариев
 const app = document.querySelector('.app');
 
-function renderMarkup({ usersComments, renderLogin, fetchPromiseWithAuthorization, container  }) {
+function renderMarkup({
+  usersComments,
+  renderLogin,
+  fetchPromiseWithAuthorization,
+}) {
   const usersNoRegisterHtml = usersComments
     .map((user, index) => {
       return `
@@ -52,22 +56,14 @@ function renderMarkup({ usersComments, renderLogin, fetchPromiseWithAuthorizatio
 </div>`;
 
   app.innerHTML = appNoRegisterHtml;
-const buttonAuthorization = document.querySelector('.add-button');
   
-  // Слушатель событий на кнопке авторизоваться
-buttonAuthorization.addEventListener('click', () => {
-  console.log('click');
-  container.classList.toggle('hidden');
-  renderLogin({ fetchPromiseWithAuthorization });
-});
-}
+  const buttonAuthorization = document.querySelector('.add-button');
 
-// Имитация обработки кнопки лайков
-function delay(interval = 300) {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve();
-    }, interval);
+  // Слушатель событий на кнопке авторизоваться
+  buttonAuthorization.addEventListener('click', () => {
+    console.log('click');
+    renderLogin({ fetchPromiseWithAuthorization });
   });
 }
-export { renderMarkup, delay };
+
+export { renderMarkup };

@@ -1,9 +1,16 @@
-// Обработчики событий на наличие данных в input
-function clearingFields({ handleInput, inputAddNameForm, areaAddFormRow }) {
-  inputAd2dNameForm.addEventListener('input', handleInput);
-  areaAddFormRow.addEventListener('input', handleInput);
+// Имитация обработки кнопки лайков
+function delay(interval = 300) {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve();
+    }, interval);
+  });
+}
 
-  inputAddNameForm.classList.remove('error');
+// Обработчики событий на наличие данных в input
+function clearingFields({ handleInput, areaAddFormRow, buttonAddForm }) {
+  areaAddFormRow.addEventListener('input', handleInput({buttonAddForm, areaAddFormRow}));
+
   areaAddFormRow.classList.remove('error');
 }
 
@@ -32,7 +39,6 @@ function initAddLikesListenerForEnter({ handleFormSubmission }) {
 function initAddLikesAndEditButtonListener({
   ulComments,
   usersComments,
-  delay,
   areaAddFormRow,
 }) {
   const textCommentsEditArea = document.querySelectorAll('.comment-area-edit');
@@ -46,8 +52,10 @@ function initAddLikesAndEditButtonListener({
     // Проверка на таргет кнопки лайка
     if (target.closest('.like-button')) {
       usersComments[index].isLikeLoading = true;
+      console.log('click')
       // Условное ветвление для отображеня изменений кнопки и счётчика
       delay(2000).then(() => {
+        console.log(usersComments[index])
         usersComments[index].likes = usersComments[index].isLiked
           ? usersComments[index].likes - 1
           : usersComments[index].likes + 1;

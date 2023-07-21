@@ -1,17 +1,14 @@
 'use strict';
-import { validateForm, handleInput } from './validate.js';
-import { getTodo, postTodo, getTodoWithAuthorization } from './api.js';
-import { renderAuthorizationPage } from './render.js';
-import { renderMarkup, delay } from './renderMarkup.js';
-import { renderLogin } from './loginPage.js';
+import { validateForm, handleInput } from './modules/validate.js';
+import { getTodo, postTodo, getTodoWithAuthorization } from './modules/api.js';
+import { renderAuthorizationPage } from './modules/render.js';
+import { renderMarkup } from './modules/renderMarkup.js';
+import { renderLogin } from './modules/loginPage.js';
 
 let usersComments = [];
 
-const form = document.querySelector('.add-form');
 const container = document.querySelector('.container');
-
 const promiseLoad = document.querySelector('.promise-load');
-const promiseAdd = document.querySelector('.promise-add');
 
 // Запрос на сервер для получения данных комментариев без авторизации
 function getUsersComments() {
@@ -19,12 +16,11 @@ function getUsersComments() {
     .then((response) => {
       console.log(response);
       usersComments = response;
-      promiseLoad.classList.add('hidden');
+      promiseLoad.classList.toggle('hidden');
       renderMarkup({
         usersComments,
         renderLogin,
         fetchPromiseWithAuthorization,
-        container,
       });
     })
     .catch((error) => {
@@ -45,7 +41,6 @@ function fetchPromiseWithAuthorization() {
       renderAuthorizationPage({
         usersComments,
         handleFormSubmission,
-        delay,
         handleInput,
       });
     })
@@ -58,9 +53,11 @@ function fetchPromiseWithAuthorization() {
 // Создаём фунцию-генератор карточек
 function appendComment(userName, userComment) {
   const areaAddFormRow = document.querySelector('.add-form-text');
-  const inputAddNameForm = document.querySelector('.add-form-name');
-  form.classList.toggle('hidden');
-  promiseAdd.classList.toggle('hidden');
+  const form = document.querySelector('.add-form');
+  const promiseAdd = document.querySelector('.promise-add');
+
+  form.classList.add('hidden');
+  promiseAdd.classList.add('hidden');
 
   postTodo(userName, userComment)
     .then((response) => {
@@ -80,9 +77,8 @@ function appendComment(userName, userComment) {
       return fetchPromiseWithAuthorization();
     })
     .then(() => {
-      form.classList.toggle('hidden');
-      promiseAdd.classList.toggle('hidden');
-      inputAddNameForm.value = '';
+      form.classList.remove('hidden');
+      promiseAdd.classList.remove('hidden');
       areaAddFormRow.value = '';
     })
     .catch((error) => {
@@ -94,7 +90,11 @@ function appendComment(userName, userComment) {
       form.classList.toggle('hidden');
       promiseAdd.classList.toggle('hidden');
     });
-    renderAuthorizationPage({ usersComments, handleFormSubmission, delay, handleInput });
+  renderAuthorizationPage({
+    usersComments,
+    handleFormSubmission,
+    handleInput,
+  });
 }
 
 // Функция обработки при нажатии на кнопку "написать"
@@ -115,6 +115,6 @@ function handleFormSubmission() {
     .replaceAll('QUOTE_BEGIN', "<div class='quote'>")
     .replaceAll('QUOTE_END', '</div>');
   inputValue === '' || areaFormValue === ''
-    ? validateForm(inputValue, areaAddFormRow)
+    ? validateForm(areaAddFormRow)
     : appendComment(inputValue, areaFormValue);
 }
