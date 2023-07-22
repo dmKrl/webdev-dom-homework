@@ -7,7 +7,6 @@ import { renderLogin } from './modules/loginPage.js';
 
 let usersComments = [];
 
-const container = document.querySelector('.container');
 const promiseLoad = document.querySelector('.promise-load');
 
 // Запрос на сервер для получения данных комментариев без авторизации

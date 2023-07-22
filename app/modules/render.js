@@ -86,17 +86,10 @@ function renderAuthorizationPage({
   initAddLikesAndEditButtonListener({
     ulComments,
     usersComments,
-    delay,
     areaAddFormRow,
+    handleInput,
+    handleFormSubmission,
   });
 }
 
-// Имитация обработки кнопки лайков
-function delay(interval = 300) {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve();
-    }, interval);
-  });
-}
-export { renderAuthorizationPage, delay };
+export { renderAuthorizationPage };
