@@ -1,3 +1,4 @@
+import format from "date-fns/format";
 const todosUrl = `https://wedev-api.sky.pro/api/v2/kralichkin-dmitry/comments`;
 const userUrl = `https://wedev-api.sky.pro/api/user/login`;
 
@@ -11,30 +12,6 @@ const setToken = (newToken) => {
 const setLoginName = (newName) => {
   return name = newName;
 }
-// Функция даты, для добавления значения 0 перед числами < 10
-const dateForComments = (date) => {
-  let data = date.getDate();
-  let month = date.getMonth();
-  let hour = date.getHours();
-  let minute = date.getMinutes();
-
-  if (data < 10) {
-    data = '0' + data;
-  }
-  if (month < 10) {
-    month = '0' + (month + 1);
-  }
-  if (hour < 10) {
-    hour = '0' + hour;
-  }
-  if (minute < 10) {
-    minute = '0' + minute;
-  }
-  return `${data}.${month}.${date
-    .getFullYear()
-    .toString()
-    .substr(-2)} ${hour}:${minute}`;
-};
 
 // Функция получения данных без авторизации
 function getTodo() {
@@ -48,7 +25,7 @@ function getTodo() {
       return responseData.comments.map((comment) => {
         return {
           name: comment.author.name,
-          date: dateForComments(new Date(comment.date)),
+          date: format(new Date(comment.date), 'dd.MM.yy hh:mm'),
           text: comment.text,
           likes: comment.likes,
           isLiked: comment.isLiked,
@@ -74,7 +51,7 @@ function getTodoWithAuthorization() {
       return responseData.comments.map((comment) => {
         return {
           name: comment.author.name,
-          date: dateForComments(new Date(comment.date)),
+          date: format(new Date(comment.date), 'dd.MM.yy hh:mm'),
           text: comment.text,
           likes: comment.likes,
           isLiked: comment.isLiked,

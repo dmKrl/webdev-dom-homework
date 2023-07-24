@@ -1,4 +1,4 @@
-import { login, setToken } from './api.js';
+import { login } from './api.js';
 
 const renderRegister = () => {
   const appElement = document.querySelector('.app');
